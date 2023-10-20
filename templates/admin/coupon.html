@@ -1,0 +1,84 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Sellers list</h2>
+        <div>
+            <a href="#" class="btn btn-primary"><i class="material-icons md-plus"></i> Create new</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="card-body">
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="coupon_name" class="form-label">Coupon Name</label>
+                            <input type="text" name="coupon_name" id="coupon_name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="coupon_code" class="form-label">Coupon Code</label>
+                            <input type="text" name="coupon_code" id="coupon_code" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date_from" class="form-label">Date Valid To</label>
+                            <input type="date" name="date_form" id="date_from" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="minimum_price" class="form-label">Minimum Price</label>
+                            <input type="number" name="minimum_price" id="minimum_price" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="discount" class="form-label">Discount (%)</label>
+                            <input type="number" name="discount" id="discount" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">COUPON_NAME</th>
+                            <th class="text-center">COUPON_CODE</th>
+                            <th class="text-center">MINIMUM_PRICE</th>
+                            <th class="text-center">VALID_UPTO</th>
+                            <th class="text-center">STATUS</th>
+                            <th class="text-center"> Action </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ob in coupons %}
+                        <tr>
+                            <td class="text-center">{{forloop.counter}}</td>
+                            <td class="text-center">{{ob.coupon_name}}</td>
+                            <td class="text-center">{{ob.coupon_code}}</td>
+                            <td class="text-center">{{ob.minimum_price}}</td>
+                            <td class="text-center">{{ob.validtill}}</td>
+                            <td class="text-center">
+                                {% if ob.status == 'Active' %}
+                                <span class="badge rounded-pill alert-success">Active</span></td>
+                                {% else %}
+                                <span class="badge rounded-pill alert-danger">Expired</span></td>
+                                {% endif %}
+                            <td class="text-center">
+                                <a href="{% url 'delete_coupon' ob.id%}" class="btn btn-sm btn-brand rounded font-sm mt-15">Delete Coupon</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table> <!-- table-responsive.// -->
+            </div>
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+</section> <!-- content-main end// -->
+
+{% endblock content %}

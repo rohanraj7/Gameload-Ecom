@@ -1,0 +1,220 @@
+{% extends 'admin/dashboard.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Dashboard </h2>
+                    <p>Whole data about your business here</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Revenue</h6>
+                                <span>₹ {{revenue}}</span>
+                                <span class="text-sm">
+                                    Shipping fees are not included
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Orders</h6> <span>{{order_count}}</span>
+                                <span class="text-sm">
+                                    Excluding orders in transit
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-cancel"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Order Cancelled</h6> <span>{{order_cancelled}}</span>
+                                <span class="text-sm">
+                                    Order Cancelled by customers
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Pending Orders</h6> <span>{{pending}}</span>
+                                <span class="text-sm">
+                                    Pending Orders in  Placed
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Products</h6> <span>{{product_count}}</span>
+                                <span class="text-sm">
+                                    In {{categories}} Categories
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Monthly Earning</h6> <span>₹ {{monthy_revenue}}</span>
+                                <span class="text-sm">
+                                    Based in your local time.
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-pending"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Pending Return</h6> <span>{{pending_return}}</span>
+                                <span class="text-sm">
+                                    Returned by customers
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-8 col-lg-12">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Sale statistics</h5>
+                            <canvas id="myChart" height="120px"></canvas>
+                            <div class="">
+                                <script>
+                                  var ctx = document.getElementById('myChart').getContext('2d');
+                                  var myChart1 = new Chart(ctx, {
+                                      type: 'line',
+                                      data: {
+                                          labels: [{% for i in monthly_sales %} '{{i.name}}', {% endfor %} ],
+                                  datasets: [{
+                                      label: 'monthly sales',
+                                      data: [{% for i in monthly_sales %} '{{ i.value }}', {% endfor %}],
+                                      backgroundColor: [
+                                          'rgba(255, 99, 132, 1)',
+                                          'rgba(54, 162, 235, 1)',
+                                          'rgba(255, 206, 86, 1)',
+                                          'rgba(75, 192, 192, 1)',
+                                          'rgba(153, 102, 255, 1)',
+                                          'rgba(255, 159, 64, 1)',
+                                          'rgba(205, 139, 64, 1)'
+                                      ],
+                                          borderColor: [
+                                              'rgba(255, 99, 132, 1)',
+                                              'rgba(54, 162, 235, 1)',
+                                              'rgba(255, 206, 86, 1)',
+                                              'rgba(75, 192, 192, 1)',
+                                              'rgba(153, 102, 255, 1)',
+                                              'rgba(255, 159, 64, 1)',
+                                              'rgba(205, 139, 64, 1)'
+                                          ],
+                                              borderWidth: 1
+                                  }]
+                                      },
+                                  options: {
+                                      scales: {
+                                          yAxes: [{
+                                              ticks: {
+                                                  beginAtZero: true
+                                              }
+                                          }]
+                                      }
+                                  }
+                                  });
+                              </script> 
+                              </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-12">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Revenue Base on Area</h5>
+                            <canvas id="myChart2" height="217"></canvas>
+                            <script>
+                                var ctx = document.getElementById('myChart2').getContext('2d');
+                                var myChart1 = new Chart(ctx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: [{% for i in weekly_sales %} '{{i.name}}', {% endfor %} ],
+                                datasets: [{
+                                    label: 'weekly sales',
+                                    data: [{% for i in weekly_sales %} '{{ i.value }}', {% endfor %}],
+                                    backgroundColor: [
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)',
+                                        'rgba(205, 139, 64, 1)',
+                                        'rgba(255, 162, 286, 1)',
+                                        'rgba(155, 102, 86, 1)',
+                                        'rgba(205, 206, 28, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                    ],
+                                        borderColor: [
+                                            'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                            'rgba(75, 192, 192, 1)',
+                                            'rgba(153, 102, 255, 1)',
+                                            'rgba(255, 159, 64, 1)',
+                                            'rgba(205, 139, 64, 1)',
+                                            'rgba(255, 162, 286, 1)',
+                                            'rgba(155, 102, 86, 1)',
+                                            'rgba(205, 206, 28, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                        ],
+                                            borderWidth: 1
+                                }]
+                                    },
+                                options: {
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                beginAtZero: true
+                                            }
+                                        }]
+                                    }
+                                }
+                                });
+                            </script>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        
+        </section>
+         <!-- content-main end// -->
+
+{% endblock content %}

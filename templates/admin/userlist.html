@@ -1,0 +1,40 @@
+{% extends 'admin/dashboard.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<section class="container mt-5">
+<p class="text-center" style="color: blue;">USER ARE LISTED HERE</p>
+
+    <table class="table table-success table-striped">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone Number</th>
+            <th scope="col" style="width: 149px;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for i in all_users %}
+          <tr>
+            <th>{{forloop.counter}}</th>
+            <td>{{i.fullname}}</td>
+            <td>{{i.email}}</td>
+            <td>{{i.phoneno}}</td>
+            <td>
+              {% if i.is_active%}<a
+              class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
+              href="{% url 'block' i.id %}" role="button">BLOCK</a>{% else %}<a
+              class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-700"
+              href="{% url 'block' i.id %}" role="button">UNBLOCK</a>{% endif %}
+            </td> 
+          </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+</section>
+
+{% endblock content %}

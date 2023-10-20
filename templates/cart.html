@@ -1,0 +1,229 @@
+{% extends 'baseuser.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+    .input-upload img {
+        max-width: 100px;
+        margin-bottom: 20px;
+    }
+
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .random {
+        background-color: #FFDA03;
+    }
+</style>
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('/static/images/bg_2.jpg');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-end justify-content-center">
+            <div class="col-md-9 ftco-animate mb-5 text-center">
+                <p class="breadcrumbs mb-0"><span class="mr-2"><a href="index.html">Home <i
+                                class="fa fa-chevron-right"></i></a></span> <span>Cart <i
+                            class="fa fa-chevron-right"></i></span></p>
+                <h2 class="mb-0 bread">My Cart</h2>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if carts%}
+<section class="ftco-section ">
+    <div class="container">
+        <div class="row">
+            <div class="table-wrap">
+                <table class="table">
+                    <thead class="thead-primary">
+                        <tr>
+                            <th>Product</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ob in carts %}
+                        <tr>
+                            <td>
+                                <div class="img" style="background-image: url('{{ ob.image.url }}');"></div>
+                            </td>
+                            <td>
+                                <div class="email">
+                                    <span>{{ob.productname}}</span>
+                                    <span>Fugiat voluptates quasi nemo, ipsa perferendis</span>
+                                </div>
+                            </td>
+                            <td style="color: rgb(243, 23, 8);">₹{{ob.price}}</td>
+
+                            <td class="quantity">
+                                <div class="input-group">
+                                    <button style="border: 10px; color: red;" type="button" class="btn btn-link px-2"
+                                        onclick="changeQuantity({{ob.id}}, -1)">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                    <span id="{{ob.id}}" name="quantity">{{ob.quantity}}</span>
+                                    <button type="button" class="btn btn-link px-2" id="myBtn2{{ob.id}}"
+                                        onclick="changeQuantity({{ob.id}}, 1)">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                    <!-- <input type="text" id="{{ob.id}}" name="quantity" class="quantity form-control input-number text-center" value="{{ob.quantity}}" min="1" max="100"> -->
+                                </div>
+                            </td>
+                            <td id="{{ob.id}}amount" style="color: green;">₹{{ob.amount}}</td>
+                            <td>
+                                <a href="{% url 'cart_remove' ob.id %}">
+                                    remove
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <div class="col col-lg-5 col-md-6 mt-5 cart-wrap ftco-animate">
+                <form action="{% url 'cart_to_checkout' %}" method="post">
+                    {% csrf_token %}
+                    <div class="cart-total mb-3">
+                        <h3>Cart Totals</h3>
+                        <p class="d-flex">
+                            <span>Subtotal</span>
+                            <span id="subtotal">₹{{subtotal}}</span>
+                            <input type="hidden" name="subtotal" value="{{subtotal}}">
+                        </p>
+                        <p class="d-flex">
+                            <span>Delivery</span>
+                            <span>₹0.00</span>
+                        </p>
+                        <p class="d-flex">
+                            <span>Discount</span>
+                            <span id="total">₹{{total}}</span>
+                            <input type="hidden" name="total" value="{{total}}">
+                        </p>
+                        <hr>
+                        <p class="d-flex total-price">
+                            <span>Total</span>
+                            <span id="total_price">₹{{total_price}}</span>
+                            <input type="hidden" name="total_price" value="{{total_price}}">
+                        </p>
+                    </div>
+                    <p class="text-center"><button type="submit" class="btn btn-primary py-3 px-4"
+                            style="background-color: #b7472a;">Proceed to Checkout</button></a>
+                    </p>
+                </form>
+                </div>
+        </div>
+    </div>
+</section>
+{% else %}
+<section class="ftco-section random ">
+    <div class="container">
+        <section class="center-content ">
+            <img src="/static/images/cartempty.gif" />
+        </section>
+        <div class="text-center text-danger">
+            <p>CART IS EMPTY ! CLICK BELOW TO CONTINUE</p>
+            <a href="{% url 'index' %}"><button type="button" class="btn btn-secondary"> SHOPPING</button></a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+
+<script>
+    function changeQuantity(id, count) {
+        var rohan = document.getElementById(id)
+        if (count == -1) {
+            $.ajax({
+                headers: {
+                    "X-CSRFToken": $('[name=csrfmiddlewaretoken]').val()
+
+                },
+                type: "POST",
+                url: "{% url 'dquantity' %}",
+
+                data: {
+                    id: id
+                },
+                success: function (response) {
+                    quan = response.q
+                    total = response.total
+                    amount = response.amount
+
+                    document.getElementById(id).innerHTML = quan
+                    let a = id + 'amount'
+
+                    k = document.getElementById(a)
+                    k.innerHTML = "₹" + amount
+
+                    document.getElementById('total').innerHTML = "₹" + total
+                    document.getElementById('subtotal').innerHTML = "₹" + response.subtotal;
+                    document.getElementById('total_price').innerHTML = "₹" + response.total_price;
+
+                    if (response.q > 1) {
+                        document.getElementById("myBtn2" + id).disabled = false;
+                    }
+                }
+            })
+        }
+        else {
+            $.ajax({
+                headers: {
+                    "X-CSRFToken": $('[name=csrfmiddlewaretoken]').val()
+
+                },
+                type: "POST",
+                url: "{% url 'iquantity' %}",
+
+                data: {
+                    id: id
+                },
+                success: function (response) {
+                    quan = response.q
+                    total = response.total
+                    amount = response.amount
+
+                    document.getElementById(id).innerHTML = quan
+                    let a = id + 'amount'
+
+                    k = document.getElementById(a)
+                    k.innerHTML = "₹" + amount
+
+                    document.getElementById('total').innerHTML = "₹" + total
+                    document.getElementById('subtotal').innerHTML = "₹" + response.subtotal;
+                    document.getElementById('total_price').innerHTML = "₹" + response.total_price;
+
+                    if (response.q == response.cart1) {
+                        document.getElementById("myBtn2" + id).disabled = true;
+                        swal(
+                            'Good job!',
+                            'Product Limit Reached',
+                            'success'
+                        )
+                    }
+                    else {
+                        document.getElementById("myBtn2" + id).disabled = false;
+                    }
+                }
+            })
+        }
+    }
+</script>
+
+{% endblock script %}

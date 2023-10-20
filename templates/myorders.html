@@ -1,0 +1,197 @@
+{% extends 'baseuser.html' %}
+
+{% load static %}
+
+{% block extra_style %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+{% endblock extra_style %}
+
+{% block content %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url('/static/images/bg_2.jpg');"
+  data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-end justify-content-center">
+      <div class="col-md-9 ftco-animate mb-5 text-center">
+        <p class="breadcrumbs mb-0"><span class="mr-2"><a href="/">Home <i
+                class="fa fa-chevron-right"></i></a></span> <span>MYORDERS <i class="fa fa-chevron-right"></i></span>
+        </p>
+        <h2 class="mb-0 bread">HERE YOUR ORDERLIST {{request.user}}</h2>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <h3 class="fw-bold mb-0 text-black text-center"><br><br>My Orders</h3>
+    <h6 class="mb-0 text-muted" items></h6>
+  </div>
+  {% if order_data %}
+  {% for i in order_data %}
+  <div class="card rounded-3 mb-4">
+    <div class="card-body p-4">
+      <div class="row d-flex justify-content-between align-items-center">
+        <div class="col-md-2 col-lg-2 col-xl-2">
+          <img src="{{ i.image.url}}" class="img-fluid rounded-3" />
+        </div>
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <p class="lead fw-normal mb-2">{{i.productname}}</p>
+
+        </div>
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <p class="lead fw-normal mb-2" style="color: green;">Rs. {{i.totalamount}} /-</p>
+
+        </div>
+        {% if i.status == False %}
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <strong style="color: red;" class="lead fw-normal mb-2">Cancelled</strong>
+
+        </div>
+        {% elif i.orderstatus == 'Return Pending' %}
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <strong style="color: red;" class="lead fw-normal mb-2">Return Pending</strong>
+        </div>
+        {% elif i.orderstatus == 'Return Intiated' %}
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <strong style="color: green;" class="lead fw-normal mb-2">Return Intiated</strong>
+        </div>
+        {% else %}
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <p class="lead fw-normal mb-2">{{i.orderstatus}}</p>
+
+        </div>
+        {% endif %}
+        <div class="col-md-3 col-lg-3 col-xl-3">
+          <p class="lead fw-normal mb-2">{{i.orderdate}}</p>
+
+        </div>
+
+
+        <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+          {% csrf_token %}
+
+
+        </div>
+        <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+          <span>
+            {% if not i.orderstatus == "Deliverd" %}
+            {% if not i.orderstatus == "Shipped" %}
+            {% if not i.orderstatus == "Out for Delivery" %}
+            {% if not i.orderstatus == "Return Pending" %}
+            {% if not i.orderstatus == "Return Intiated" %}
+            <td>{% if i.status %}
+              <a type="button" data-bs-toggle="modal" data-bs-target="#exampleModal2{{i.id}}" class="btn btn-success"
+                href="" role="button">Cancel Order</a>
+              {% else %}<a class="btn btn-primary " href="{% url 'cancelorder' i.id %}" role="button"
+                hidden>cancelled</a>
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% if i.orderstatus == 'Deliverd' %}
+              <a type="button" data-bs-toggle="modal" data-bs-target="#exampleModal1{{i.id}}"
+                class="btn btn-danger me-5" href="" role="button">RETURN</a>
+              {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="exampleModal1{{i.id}}" tabindex="-1" aria-labelledby="exampleModalLabel2"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">RETURN TIME PERIOD IS 10 days </h5>
+        </div>
+        <div class="modal-body">
+          DO YOU WANT TO RETURN THE ORDER
+        </div>
+        <div class="modal-footer">
+          <button type="button"
+            class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
+            data-bs-dismiss="modal">Close</button>
+          <a href="{% url 'return_order' i.id %}"> <button type="button"
+              class=" px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-700">RETURN</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="modal fade" id="exampleModal2{{i.id}}" tabindex="-1" aria-labelledby="exampleModalLabel2"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Cancel This Order</h5>
+        </div>
+        <div class="modal-body">
+          Do you wish to Cancel the Product: - <span style="color: brown;">{{i.productname}}</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button"
+            class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
+            data-bs-dismiss="modal">Close</button>
+          <a href="{% url 'cancelorder' i.id %}"> <button type="button"
+              class=" px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-700">Change</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  <!-- PAGINATION -->
+  <div class="row mt-5">
+    <div class="col text-center">
+      <div class="block-27">
+        <ul>
+          {% if order_data.has_previous %}
+          <li><a href="/myorders/?page={{ order_data.previous_page_number }}">&lt;</a></li>
+          {% endif %}
+          {% for n in order_data.paginator.page_range %}
+          <li {% if n == order_data.number %}class="active" {% endif %}>
+            <a href="/myorders/?page={{ n }}">{{ n }}</a>
+          </li>
+          {% endfor %}
+          {% if order_data.has_next %}
+          <li><a href="/myorders/?page={{ order_data.next_page_number }}">&gt;</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- END PAGINATION -->
+
+  {% else%}
+      <section >
+        <div class="container">
+            <section class="center-content ">
+                <img width="1000px" src="/static/images/Mantas Gr.gif" />
+            </section>
+            <div class="text-center text-danger">
+                <p>You didn't ordered any items yet ...😫!</p>
+                <a href="{% url 'index' %}"><button class="btn btn-primary mb-5">Continue Shopping</button></a>
+            </div>
+        </div>
+    </section>
+  {% endif %}
+</div>
+
+
+
+{% endblock content %}
+
+{% block script %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+{% endblock script %}

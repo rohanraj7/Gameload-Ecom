@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+    <style>
+      .center {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+      }
+  </style>
+  </head>
+  <body>
+
+    <div class="center">
+      
+      <div class="card">
+    <div class="card-body mx-4">
+      <div class="container">
+        <p class="my-5 mx-5" style="font-size: 30px;"></p>
+        <div class="row">
+          <ul class="list-unstyled">
+            <li class="text-black"><span><strong></strong></span></li>
+            <li class="text-muted mt-1"><span class="text-black">Invoice</span>:-  {{ord1}} </li>
+          </ul>
+          <hr>
+        </div>
+        <div class="row">
+          <!-- <div class="col-xl-10">
+            <p>Consulting</p>
+          </div>
+          <div class="col-xl-2">
+            <p class="float-end">$100.00
+            </p>
+          </div> -->
+          <hr>
+        </div>
+        <!-- <div class="row">
+          <div class="col-xl-10">
+            <p>Support</p>
+          </div>
+          <div class="col-xl-2">
+            <p class="float-end">$10.00
+            </p>
+          </div>
+          <hr style="border: 2px solid black;">
+        </div> -->
+        <div class="row text-black">
+          <div class="card-body" style="text-align:center;width:100%">
+                <table style="text-align:center;width:100%">
+  
+                      <tr>
+                      <th>ProductName</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
+                      
+                    {% for i in product %}
+                    <tr>
+                    <td>{{ i.productname }}</td>
+                    <td>{{i.quantity}}</td>
+                    <td>{{i.amount}}</td>
+                  </tr>
+                    {% endfor %}
+                    
+                    <!-- the paypal id is this
+                    sb-mf443w22957751@business.example.com -->
+                  
+                  </table>
+                  <hr>
+                <strong class="float-end">Total Price :{{total_price}} </strong>
+                  
+            </div>
+            <hr style="border: 2px solid black;">
+  
+          <div class="col-xl-12">
+            <p class="float-end fw-bold">Total:<span style="color: green;">  {{total_price}}</span></p>
+          </div>
+        </div>
+        <div class="text-center" style="margin-top: 90px;">
+          <!-- <a><u class="text-info">View in browser</u></a>
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. </p> -->
+        </div>
+  
+      </div>
+    </div>
+  </div>
+
+
+    <script src="https://www.paypal.com/sdk/js?client-id=ATKvUWgsFZOI0pb3HI_xwIeXgTKorm0AG79m1gdAJUG7qOQrFeNrvP2ujwpASlLiGR49ulKWjnYszNjk
+    "></script>
+
+
+
+       {% csrf_token %}
+    <div id="paypal-button-container"></div>
+    <!--<script>
+      paypal.Buttons({
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: '77' 
+              }
+            }]
+          });
+        },
+        onApprove: (data, actions) => {
+          return actions.order.capture().then(function(orderData) {
+            console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+            const transaction = orderData.purchase_units[0].payments.captures[0];
+            alert(`Transaction ${transaction.status}: ${transaction.id}\n\nSee console for all available details`);
+          
+          });
+        }
+      }).render('#paypal-button-container');
+    </script> -->
+
+
+    <script>
+      // Generating csrf_token on the fly
+      function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+      }
+      return cookieValue;
+}
+
+      let amount = "{{ total_price }}"
+      const url = ""
+      let csrftoken = getCookie('csrftoken');
+      let orderID = "{{neworderid}}"
+      const payment_method = 'paypal'
+      const redirect_url = "{% url 'success_page' %}"
+      const order_errors_url = "{% url 'success_page' %}"
+      // Render the PayPal button into #paypal-button-container
+      const paypalButtonsComponent = paypal.Buttons({
+          // optional styling for buttons
+          // https://developer.paypal.com/docs/checkout/standard/customize/buttons-style-guide/
+          style: {
+            color: "gold",
+            shape: "pill",
+            layout: "vertical"
+          },
+
+          // set up the transaction
+          createOrder: (data, actions) => {
+              // pass in any options from the v2 orders create call:
+              // https://developer.paypal.com/api/orders/v2/#orders-create-request-body
+              const createOrderPayload = {
+                  purchase_units: [
+                      {
+                          amount: {
+                              value: total_price_amount
+                          }
+                      }
+                  ]
+              };
+
+              return actions.order.create(createOrderPayload);
+          },
+
+          // finalize the transaction
+          onApprove: (data, actions) => {
+              const captureOrderHandler = (details) => {
+                  const payerName = details.payer.name.given_name;
+                  transaction_id = details['purchase_units'][0]['payments']['captures'][0].id
+                  //console.log(transaction_id)
+                  sendData();
+                  function sendData() {
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                        "Content-type": "application/json",
+                        "X-CSRFToken": csrftoken,
+                        },
+                        body: JSON.stringify({
+                            orderID: orderID,
+                            transID: details.id,
+                            paypal_transaction_id: transaction_id,
+                            payment_method: payment_method,
+                            status: details.status,
+                        }),
+                    })
+                     .then((response) => response.json())
+                     .then((data) => {
+                        window.location.href = redirect_url + '?order_number=' + data.order_number + '&payment_id=' + data.transID;
+                    });
+                  }
+              };
+
+              return actions.order.capture().then(captureOrderHandler);
+          },
+
+          // handle unrecoverable errors
+          onError: (err) => {
+              // console.error('An error prevented the buyer from checking out with PayPal');
+              window.location.href = order_errors_url
+          }
+          
+      });
+
+      paypalButtonsComponent
+          .render("#paypal-button-container")
+          .catch((err) => {
+              console.error('PayPal Buttons failed to render');
+          });
+
+</script>
+
+
+  </body>
+</html>

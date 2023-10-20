@@ -1,0 +1,109 @@
+{% extends 'admin/dashboard.html' %}
+
+
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-danger" style="margin-top: 79px;">SALES  REPORT</h2>
+     <div class="row">
+        <div class="col-md-12  rounded mt-2 pt-3">
+            <form action="{% url 'date_wise' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {% for message in messages%}
+                    <div class="alert alert-danger" role="alert">
+                        {{message}}
+                      </div>
+                      {%endfor%}
+                    <div class="d-flex w-100">
+                        <div class="w-50">
+                            <label for="start_date">Start Date</label>
+                            <input type="date" class="form-control bg-light text-dark " style="width:70%;"
+                                id="start" name="start_date">
+                        </div>
+                        <div class="w-50">
+                            <label for="end_date">End Date</label>
+                            <input type="date" class="form-control bg-light text-dark " style="width:70%;"
+                                id="end" name="end_date">
+                        </div>
+                        <div class="w-10 mt-4">
+                <button type="submit" class="btn btn-primary ">Filter</button>
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+        
+</div>
+<hr>
+{% if o_count < 1 %}
+<p class="text-center" style="    color: black; font-size: 19px; background: cadetblue;"> NO DATA FOUND</p>
+{%else%}
+<div style="width: 80%; margin-left: 139px;">
+    <table id ="table" class="table table-bordered" style="    margin-top: -46px;">
+        <thead  class="alert-warning">
+            <tr>
+                <th>date</th>
+                <th>OrderID</th>
+                <th>DeliveryStatus</th>
+                {% comment %} <th>Month</th> {% endcomment %}
+                <th>Amount Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in lol %}
+            <tr>
+                <td>{{i.orderdate}}</td>
+                <td>{{i.orderid}}</td>
+                <td>{{i.orderstatus}}</td>
+                {% comment %} <td>{{i.month}}</td> {% endcomment %}
+                <td>{{i.totalamount}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    
+</div>    
+
+<!--bootstrap-->
+<link href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet"></link>  
+<link href="https://cdn.datatables.net/buttons/2.3.2/css/buttons.dataTables.min.css" rel="stylesheet"></link>
+
+{% endblock content %}
+
+{% block js %}
+
+<script>
+    $("#start").on("change", function () {
+        $("#end").attr("min", $(this).val());
+    });
+</script>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+   <script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.3.2/js/dataTables.buttons.min.js"></script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.html5.min.js"></script>
+   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.print.min.js"></script>
+
+   <!--sales_report-->
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#table').DataTable( {
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+        } );
+    } );
+</script> 
+{% endblock js %}

@@ -1,0 +1,197 @@
+{% extends 'baseuser.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url('/static/images/bg_2.jpg');"
+    data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-end justify-content-center">
+            <div class="col-md-9 ftco-animate mb-5 text-center">
+                <p class="breadcrumbs mb-0"><span class="mr-2"><a href="index.html">Home <i
+                                class="fa fa-chevron-right"></i></a></span> <span>Product <i
+                            class="fa fa-chevron-right"></i></span></p>
+                <h2 class="mb-0 bread">Products</h2>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="ftco-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+                <div class="row mb-4">
+                    <div class="col-md-12 d-flex justify-content-between align-items-center">
+                        <form action="" method="get">
+                            {% csrf_token %}
+                            <input type="text" name="search" placeholder="Search the product">
+                            <button type="submit" class="site-btn">SEARCH</button>
+                        </form>
+                        <select class="selectpicker" multiple>
+                            {% for ob in categories %}
+                            <option>{{ob.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <!-- HERE SEARCHING FOR THE PRODUCT SEARCH  -->
+
+                    {% if searchfound %}
+                    {% for ob in searchfound %}
+                    <div class="col-md-4 d-flex">
+                        <div class="product ftco-animate">
+                            <div class="img d-flex align-items-center justify-content-center"
+                                style="background-image: url('/media/{{ob.image1}}');">
+                                <div class="desc">
+                                    <p class="meta-prod d-flex">
+                                        <a href="{% url 'product_addtocart' ob.id 'products' %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-shopping-bag"></span></a>
+                                        <a href="{% url 'addto_wishlist' ob.id 'products' %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-heart"></span></a>
+                                        <a href="{% url 'single_product' ob.id %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-visibility"></span></a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text text-center">
+                                <span class="sale">Sale</span>
+                                <span class="category">{{ob.category}}</span>
+                                <h2>{{ob.name}}</h2>
+                                <p class="mb-0"><span class="price price-sale">$69.00</span> <span
+                                        class="price">${{ob.price}}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+
+                    <!-- SEACRHING WITH PRODUCT WITH CATEGORIES  -->
+
+                    {% if user_categorie_search %}
+                    {% for ob in user_categorie_search %}
+                    <div class="col-md-4 d-flex">
+                        <div class="product ftco-animate">
+                            <div class="img d-flex align-items-center justify-content-center"
+                                style="background-image: url('{{ob.image1.url}}');">
+                                <div class="desc">
+                                    <p class="meta-prod d-flex">
+                                        <a href="{% url 'product_addtocart' ob.id 'products' %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-shopping-bag"></span></a>
+                                        <a href="{% url 'addto_wishlist' ob.id 'products' %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-heart"></span></a>
+                                        <a href="{% url 'single_product' ob.id %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-visibility"></span></a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text text-center">
+                                <span class="sale">Sale</span>
+                                <span class="category">{{ob.category}}</span>
+                                <h2>{{ob.name}}</h2>
+                                <p class="mb-0"><span class="price price-sale">$69.00</span> <span
+                                        class="price">${{ob.price}}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    {% for ob in product_data %}
+                    <div class="col-md-4 d-flex">
+                        <div class="product ftco-animate">
+                            <div class="img d-flex align-items-center justify-content-center"
+                                style="background-image: url('{{ob.image1.url}}');">
+                                <div class="desc">
+                                    <p class="meta-prod d-flex">
+                                        <a href="{% url 'product_addtocart' ob.id 'products' %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-shopping-bag"></span></a>
+                                        <a href="{% url 'addto_wishlist' ob.id 'products' %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-heart"></span></a>
+                                        <a href="{% url 'single_product' ob.id %}"
+                                            class="d-flex align-items-center justify-content-center"><span
+                                                class="flaticon-visibility"></span></a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text text-center">
+                                <span class="sale">Sale</span>
+                                <span class="category">{{ob.category}}</span>
+                                <h2>{{ob.name}}</h2>
+                                <p class="mb-0">
+                                    <span class="price price-sale" style="color: red;">₹{{ ob.price }}</span>
+                                    <span class="price" style="color: green;">₹{{ ob.offeredprice }}</span>
+                                </p>
+                                {% if ob.stock < 1 %} <p style="color: red;"> OUT OF STOCK</p>
+                                    {% else %}
+                                    <p style="color: green;">{{ob.stock}} Left</p>
+                                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- ....................PAGINATION.................-->
+
+                <div class="row mt-5">
+                    <div class="col text-center">
+                        <div class="block-27">
+                            <ul>
+                                {% if product_data.has_previous %}
+                                <li><a href="/products/?page={{ product_data.previous_page_number }}">&lt;</a></li>
+                                {% endif %}
+                                {% for n in product_data.paginator.page_range %}
+                                <li {% if n == product_data.number %}class="active" {% endif %}><a
+                                        href="/products/?page={{ n }}">{{ n }}</a></li>
+                                {% endfor %}
+                                {% if product_data.has_next %}
+                                <li><a href="/products/?page={{ product_data.next_page_number }}">&gt;</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <!-- ....................PAGINATION.................-->
+
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="sidebar-box ftco-animate">
+                    <div class="categories">
+                        <h3>Product Types</h3>
+                        <ul class="p-0">
+                            {% for ob in categories %}
+                            <li><a href="{% url 'filter' ob.id %}">{{ob.name}} <span
+                                        class="fa fa-chevron-right"></span></a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+{% endblock script %}

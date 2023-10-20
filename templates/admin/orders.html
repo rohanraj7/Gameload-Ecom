@@ -1,0 +1,187 @@
+{% extends 'admin/dashboard.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+    .input-upload img {
+        max-width: 100px;
+        margin-bottom: 20px;
+    }
+
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .random {
+        background-color: #38310665;
+    }
+</style>
+
+<div class="card mb-4">
+    <header class="card-header">
+        <h4 class="card-title">Latest orders</h4>
+    </header>
+    {% if order_data %}
+    <div class="card-body">
+        <div class="table-responsive">
+            <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-center">
+                                SL.NO
+                            </th>
+                            <th class="align-middle" scope="col">Image</th>
+                            <th class="align-middle" scope="col">Order ID</th>
+                            <th class="align-middle" scope="col">Billing Name</th>
+                            <th class="align-middle" scope="col">Date</th>
+                            <th class="align-middle" scope="col">Total</th>
+                            <th class="align-middle" scope="col">Order Status</th>
+                            <th class="align-middle" scope="col">Payment Method</th>
+                            <th class="align-middle" scope="col">View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ob in order_data %}
+                        <tr>
+                            <td class="text-center">
+                                <p>{{forloop.counter}}.</p>
+                            </td>
+                            <td>
+                                    <div class="input-upload" >
+                                        <img class="mt-10" style="height: 30px;" src="{{ob.image.url}}" alt="">
+                                </div>
+                            </td>
+                            <td><a href="#" class="fw-bold">{{ob.orderid}}</a> </td>
+                            <td>{{ob.userid}}</td>
+                            <td>
+                                {{ob.orderdate}}
+                            </td>
+                            <td>
+                                ₹{{ob.totalamount}}
+                            </td>
+                            <td>
+                                {% if ob.status == False %}
+                                <span class="badge badge-pill badge-soft-danger">cancelled</span>
+
+                                {% else %}
+                                    {% if ob.orderstatus == 'Placed' %}
+                                    <span class="badge badge-pill badge-soft-primary">{{ob.orderstatus}}</span>
+                                    {% elif ob.orderstatus == "Shipped" %}
+                                    <span class="badge badge-pill badge-soft-warning">{{ob.orderstatus}}</span>
+                                    {% elif ob.orderstatus == "Out for Delivery" %}
+                                    <span class="badge badge-pill badge-soft-info">{{ob.orderstatus}}</span>
+                                    {% elif ob.orderstatus == "Deliverd" %}
+                                    <span class="badge badge-pill badge-soft-dark">{{ob.orderstatus}}</span>
+                                    {% elif ob.orderstatus == "Return Pending" %}
+                                    <span class="badge badge-pill" style="background-color: blue; color: white;">{{ob.orderstatus}}</span>
+                                    {% elif ob.orderstatus == "Return Intiated" %}
+                                    <span class="badge badge-pill badge-soft-dark">{{ob.orderstatus}}</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <i class="material-icons md-payment font-xxl text-muted mr-5"></i> {{ob.method}}
+                            </td>
+                            <td>
+                                {% if ob.orderstatus != "Deliverd" and ob.orderstatus != "Return Intiated" and ob.status == True %}
+                                    {% if ob.orderstatus %}
+                                        <a type="button" data-bs-toggle="modal" data-bs-target="#example1{{ob.id}}" class="btn btn-xs" role="button">CHANGE</a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- table-responsive end// -->
+        
+
+
+
+    </div>
+    {% else %}
+    <section class="">
+        <div class="container">
+            <section class="center-content ">
+                <img width="1000px" src="/static/images/Mantas Gr.gif" />
+            </section>
+            <div class="text-center text-danger">
+                <p>No Order Yet...!</p>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ....................PAGINATION.................-->
+
+        <div class="pagination-area mt-15 mb-50 text-center">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if order_data.has_previous %}
+                    <li class="page-item"><a class="page-link" href="/orders/?page={{ order_data.previous_page_number }}"><i class="material-icons md-chevron_left"></i></a></li>
+                    {% endif %}
+                    {% for n in order_data.paginator.page_range %}
+                        <li {% if n == order_data.number %} class="page-item active" {% endif %}><a class="page-link" href="/orders/?page={{ n }}">{{ n }}</a></li>
+                    {% endfor %}
+                    {% if order_data.has_next %}
+                    <li class="page-item"><a class="page-link" href="/orders/?page={{ order_data.next_page_number }}"><i class="material-icons md-chevron_right"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+
+    <!-- ....................PAGINATION.................-->
+</div>
+
+{% for ob in order_list %}
+<div class="modal" tabindex="-1" id="example1" >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Order status:- <span style="color: green;">{{ob.orderstatus}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        {% if ob.orderstatus == 'Placed' %}
+        <div class="modal-body">
+          Do you wish to change the order status to:- <span style="color: green;">SHIPPED</span>
+        </div>
+        {% endif %}
+        {% if ob.orderstatus == 'Shipped' %}
+        <div class="modal-body">
+          Do you wish to change the order status to:- <span style="color: green;">Out For Delivery</span>
+        </div>
+        {% endif %}
+        {% if ob.orderstatus == 'Out for Delivery' %}
+        <div class="modal-body">
+          Do you wish to change the order status to:- <span style="color: green;">Delivered</span>
+        </div>
+        {% endif %}
+        {% if ob.orderstatus == 'Return Pending' %}
+        <div class="modal-body">
+          Do you wish to change the order status to:- <span style="color: green;">Return Accepted</span>
+        </div>
+        {% endif %}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <a href="{% url 'orderstatus' ob.id %}"><button type="button" class="btn btn-primary">Save changes</button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
+{% endblock content %}
+
+
+
+
+
+
+

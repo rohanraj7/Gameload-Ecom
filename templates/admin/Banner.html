@@ -1,0 +1,64 @@
+{% extends 'admin/dashboard.html' %}
+
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">BANNER </h2>
+            <p>Add, edit or delete a Banner</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search Categories" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-9">
+                    <form action="" method="post" enctype="multipart/form-data">
+                        <!-- Part 1 Card -->
+                        {% csrf_token %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Media</h4>
+                            </div>
+                            <div class="card-body part1">
+                                <div class="input-upload">
+                                    <img src="/static/admin/assets/imgs/theme/upload.svg" alt="">
+                                    <input class="form-control" accept="image/*" type="file" name="img1">
+                                </div>
+                                <div class="d-grid  col-3">
+                                    <button type="submit" class="btn btn-primary">Create Banner</button>
+                                </div>
+                            </div>
+                        </div> <!-- Part 1 card end // -->
+                    </form>
+                </div>
+                {% if banner %}
+                <div class="col-md-3">
+                    <!-- Part 2 Card -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4>Media</h4>
+                            <a class="menu-link" href="{% url 'delete_banner' banner.0.id %}"> <i class="icon material-icons md-delete"></i>
+                        </div>
+
+                        <div class="card-body part2">
+                            <div class="input-upload">
+                                <img src="{{banner.0.image.url}}" alt="">
+                                
+                            </div>
+                        </div>
+                    </div> <!-- Part 2 card end // -->
+                </div>
+                {% endif %}
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+
+    <!-- card .// -->
+</section> <!-- content-main end// -->
+
+
+{% endblock %}
