@@ -98,12 +98,15 @@ def dashboard(request):
     
     
 def banner(request):
-    if request.method == "POST":
-        img = request.FILES.get('img1')
-        banner = Banner(image=img)
-        banner.save()   
-    banner = Banner.objects.all()
-    return render(request, 'admin/poster.html',{'banner':banner})
+    if request.user.is_superuser:
+        if request.method == "POST":
+            img = request.FILES.get('img1')
+            banner = Banner(image=img)
+            banner.save()   
+        ban = Banner.objects.all()
+        return render(request, 'admin/banner.html',{'ban':ban})
+    return render(request, 'admin/adminlogin.html')
+    
 
 def delete_banner(request,id):
     banner = Banner.objects.get(id=id)

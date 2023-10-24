@@ -35,18 +35,18 @@
                         </div> <!-- Part 1 card end // -->
                     </form>
                 </div>
-                {% if banner %}
+                {% if ban %}
                 <div class="col-md-3">
                     <!-- Part 2 Card -->
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4>Media</h4>
-                            <a class="menu-link" href="{% url 'delete_banner' banner.0.id %}"> <i class="icon material-icons md-delete"></i>
+                            <a class="menu-link" href="{% url 'delete_banner' ban.0.id %}"> <i class="icon material-icons md-delete"></i>
                         </div>
 
                         <div class="card-body part2">
                             <div class="input-upload">
-                                <img src="{{banner.0.image.url}}" alt="">
+                                <img src="{{ban.0.image.url}}" alt="">
                                 
                             </div>
                         </div>
