@@ -103,7 +103,7 @@ def banner(request):
         banner = Banner(image=img)
         banner.save()   
     banner = Banner.objects.all()
-    return render(request, 'admin/banner.html',{'banner':banner})
+    return render(request, 'admin/Banner.html',{'banner':banner})
 
 def delete_banner(request,id):
     banner = Banner.objects.get(id=id)
