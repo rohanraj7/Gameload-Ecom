@@ -62,5 +62,5 @@ class User(AbstractBaseUser):
     def is_admin(self):
         return self.admin
 
-    def is_active(self):
+    def get_active(self):
         return self.active

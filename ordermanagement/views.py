@@ -66,7 +66,6 @@ def cart_to_checkout(request):
         try:
             cart_items = Cart.objects.filter(userid=request.user)
             product = Cart.objects.filter(userid=request.user.id).values()
-            print(product,"THE PRODUCT VALUES ARE THIS...!")
             subtotal = sum(amount.price*amount.quantity for amount in cart_items)
             total_price = sum(item.amount for item in cart_items)
             total = total_price
@@ -96,44 +95,79 @@ def cart_to_checkout(request):
         # FOR THE RAZORPAY GETTING 
         request.session['total_price'] = str(total_price)
 
-        # COUPONS_MANAGEMENT 
-        now = timezone.now()
-        if 'coupon_filled' in request.GET:
-            code = request.GET['coupon']
-            try:
-                coupon_details = Coupon.objects.get(
-                    coupon_code=code,
-                    added_date__lt=now,
-                    validtill__gte=now,  # Ensure the coupon is not expired.
-                    minimum_price__lte=total_price  # Ensure the total price meets the minimum requirement.
-                )
+        # # COUPONS_MANAGEMENT 
+        # now = timezone.now()
+        # if 'coupon_filled' in request.POST:
+        #     code = request.POST['coupon']
+        #     try:
+        #         coupon_details = Coupon.objects.get(
+        #             coupon_code=code,
+        #             added_date__lt=now,
+        #             validtill__gte=now,  # Ensure the coupon is not expired.
+        #             minimum_price__lte=total_price  # Ensure the total price meets the minimum requirement.
+        #         )
                 
-                request.session['coupon_offer'] = coupon_details.discount
-                request.session['coupon_code'] =coupon_details.coupon_code
-                applied = request.session['coupon_code']
-                if request.session['coupon_offer'] is not None:
-                    previous_amount = total
-                    discount = (total*request.session['coupon_offer'])/100
-                    total = total-(total*request.session['coupon_offer'])/100
-                    total_price = total
-                    n = ' Coupon APPLIED successfully '
-                    messages.success(request,n)
-            except Coupon.DoesNotExist:
-                print("NOT AT ALL")
-                messages.error(request, "Coupon Not Valid, Enter Valid Coupon..!")
-                return redirect(cart_to_checkout)
+        #         request.session['coupon_offer'] = coupon_details.discount
+        #         request.session['coupon_code'] =coupon_details.coupon_code
+        #         applied = request.session['coupon_code']
+        #         if request.session['coupon_offer'] is not None:
+        #             previous_amount = total
+        #             discount = (total*request.session['coupon_offer'])/100
+        #             total = total-(total*request.session['coupon_offer'])/100
+        #             total_price = total
+        #             n = ' Coupon APPLIED successfully '
+        #             messages.success(request,n)
+        #     except Coupon.DoesNotExist:
+        #         messages.error(request, "Coupon Not Valid, Enter Valid Coupon..!")
+        #         return redirect(cart_to_checkout)
             
         if request.method == "POST":
+            # COUPONS_MANAGEMENT 
+            now = timezone.now()
+            if 'coupon_filled' in request.POST:
+                code = request.POST['coupon']
+                try:
+                    coupon_details = Coupon.objects.get(
+                        coupon_code=code,
+                        added_date__lt=now,
+                        validtill__gte=now,  # Ensure the coupon is not expired.
+                        minimum_price__lte=total_price  # Ensure the total price meets the minimum requirement.
+                    )
+
+                    request.session['coupon_offer'] = coupon_details.discount
+                    request.session['coupon_code'] =coupon_details.coupon_code
+                    applied = request.session['coupon_code']
+                    if request.session['coupon_offer'] is not None:
+                        previous_amount = total
+                        discount = (total*request.session['coupon_offer'])/100
+                        total = total-(total*request.session['coupon_offer'])/100
+                        total_price = total
+                        n = ' Coupon APPLIED successfully '
+                        messages.success(request,n)
+                        context = {
+                            "product":product,
+                            "subtotal": subtotal,
+                            "total":total,
+                            "total_price":total_price,
+                            "cart_counts": cart_counts,
+                            "wishlist_counts":wishlist_counts,
+                            "address_data": address_data,
+                            "coupons":coupons,
+                            "discount":discount,
+                            "previous_amount":previous_amount,
+                            "applied":applied
+                        }
+                        return render(request, 'checkout.html',context)
+                except Coupon.DoesNotExist:
+                    messages.error(request, "Coupon Not Valid, Enter Valid Coupon..!")
+                    return redirect(cart_to_checkout)
             if 'address' in request.POST and 'method' in request.POST:
                 address_details = request.POST['address']
                 payment_method = request.POST['method']
                 address_data_id= Address.objects.get(id=address_details)
                 request.session['address'] = address_details
-                print("The address id is :-",address_data_id)
-                print("The payment method is",payment_method)
 
                 if payment_method == "COD":
-                    print("FREEDOM")
                     for ob in product:
                         product_data = Stock.objects.get(id=ob['productid_id'])
                         if product_data.stock >= ob['quantity']:
@@ -144,11 +178,9 @@ def cart_to_checkout(request):
                             Stock.objects.filter(id=ob['productid_id']).update(stock=(product_data.stock - ob['quantity']))
                             return render(request, 'success.html',{'payment_method':payment_method})
                         else:
-                            messages.warning(request, 'PRODUCT OT OF STOCK')
+                            messages.warning(request, 'PRODUCT OUT OF STOCK')
                             return redirect(cart_to_checkout)
-                        
                 elif payment_method == "razorpay":
-                    print("HEAVEN")
                     amount = float(total_price*100)
                     order_currency = 'INR'
                     client = razorpay.Client(
@@ -164,7 +196,6 @@ def cart_to_checkout(request):
                     return render(cart_to_checkout)
                 
                 elif payment_method == "paypal_money":
-                    print("HELLLLLLLLLLLLLLLLLLL")
                     total_price_amount = request.session['total_price']
                     orderid = request.session['order_id']
                     for ob in product:
@@ -178,24 +209,8 @@ def cart_to_checkout(request):
                             context = {'total':total_price,'orderid':orderid,'ob':product,'m':total_price_amount,'ord1':ord1}
                             return render(request,'payments/paypal.html', context)
                 else:
-                    print("NO WAY!!!")
                     del_cart = Cart.objects.filter(userid=request.user.id)
                     del_cart.delete()
-            else:
-                context = {
-            "product":product,
-            "subtotal": subtotal,
-            "total":total,
-            "total_price":total_price,
-            "cart_counts": cart_counts,
-            "wishlist_counts":wishlist_counts,
-            "address_data": address_data,
-            "coupons":coupons,
-            "discount":discount,
-            "previous_amount":previous_amount,
-            "applied":applied
-        }
-                return render(request, "checkout.html",context)
         context = {
             "product":product,
             "subtotal": subtotal,
@@ -215,6 +230,39 @@ def cart_to_checkout(request):
         return render(request, 'login_signup/login.html')
 
 
+def coupon_generator(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            coupon_name = request.POST['coupon_name']
+            coupon_code = request.POST['coupon_code']
+            date_form = request.POST['date_form']
+            date_form_datetime = timezone.make_aware(datetime.strptime(date_form, "%Y-%m-%d"))  # Convert to aware datetime
+            minimum_price = request.POST['minimum_price']
+            minimum_price = request.POST['minimum_price']
+            discount = request.POST['discount']
+            current_date = timezone.now() 
+
+             # Check if the coupon is active or expired
+            status = "Active" if date_form_datetime >= current_date else "Expired"  # Compare date_form_datetime with current_date
+
+
+            coupon_data = Coupon(coupon_name=coupon_name,coupon_code=coupon_code,validtill=date_form_datetime,minimum_price=minimum_price,discount=discount,status=status)
+            coupon_data.save()
+            messages.success(request, 'The Coupon Added Successfully')
+            return redirect(coupon_generator)
+        coupons = Coupon.objects.all()
+        context = {'coupons':coupons}
+        return render(request, 'admin/coupon.html',context)
+    return render(request, 'admin/adminlogin.html')
+    
+
+def delete_coupon(request,id):
+    if request.user.is_superuser:
+        coupon_data = Coupon.objects.get(id=id)
+        coupon_data.delete()
+        messages.success(request, "Coupon Deleted")
+        return redirect(coupon_generator)
+    return render(request, 'admin/adminlogin.html')
         
         
 
@@ -266,7 +314,6 @@ def myorders(request):
     if request.user.is_authenticated:
         order_list = Myorders.objects.filter(userid=request.user.id).order_by('-id')
         cart_counts = Cart.objects.filter(userid = request.user.id).count()
-        print(cart_counts,"NO BABYYYYYYYY!")
         wishlist_counts = Wishlist.objects.filter(user = request.user.id).count()
         order_listed = []
         orderdata = None  # Initialize orderdata here
@@ -298,14 +345,37 @@ def myorders(request):
     return render(request, 'login_signup/login.html')
 
 
+def coupon_generator(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            coupon_name = request.POST['coupon_name']
+            coupon_code = request.POST['coupon_code']
+            date_form = request.POST['date_form']
+            date_form_datetime = timezone.make_aware(datetime.strptime(date_form, "%Y-%m-%d"))  # Convert to aware datetime
+            minimum_price = request.POST['minimum_price']
+            minimum_price = request.POST['minimum_price']
+            discount = request.POST['discount']
+            current_date = timezone.now() 
+
+             # Check if the coupon is active or expired
+            status = "Active" if date_form_datetime >= current_date else "Expired"  # Compare date_form_datetime with current_date
+
+
+            coupon_data = Coupon(coupon_name=coupon_name,coupon_code=coupon_code,validtill=date_form_datetime,minimum_price=minimum_price,discount=discount,status=status)
+            coupon_data.save()
+            messages.success(request, 'The Coupon Added Successfully')
+            return redirect(coupon_generator)
+        coupons = Coupon.objects.all()
+        context = {'coupons':coupons}
+        return render(request, 'admin/coupon.html',context)
+    return render(request, 'admin/adminlogin.html')
+
+
 def cancelorder(request,id):
     if request.user.is_authenticated:
         order_list = Myorders.objects.get(id=id)
-        print(order_list,"ARAAA")
         if order_list.orderstatus == "Placed":
-            print("Depper")
             if order_list.status == True:
-                print("NOOOO")
                 Myorders.objects.filter(id=id).update(status=False)
                 Myorders.objects.filter(id=id).update(orderstatus='Cancelled')
                 messages.success(request, f"{order_list.productname} is cancelled...!")
@@ -321,10 +391,7 @@ def success_page(request):
 
 def return_order(request,id):
     if request.user.is_authenticated:
-        print("HERE MAN")
         order_list = Myorders.objects.get(id=id)
-        print(order_list,"ARAA")
-        print(order_list.orderstatus,"ARAA2")
         order_list.orderstatus = "Return Pending"
         order_list.save()
         messages.error(request, "The Product Returned")

@@ -9,7 +9,6 @@ urlpatterns = [
     path('orders/',views.orders,name='orders'),
     path('banner/',views.banner,name="banner"),
     path('delete_banner/<int:id>',views.delete_banner,name="delete_banner"),
-    path('coupons/',views.coupon_generator,name="coupon_generator"),
     path('removecoupon/<int:id>',views.delete_coupon,name="delete_coupon"),
     path('orderstatus/<int:id>',views.orderstatus,name="orderstatus"),
     path('salesreport/',views.salesreport,name="salesreport"),

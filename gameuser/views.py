@@ -24,7 +24,6 @@ def home(request):
         banner = Banner.objects.all()
         cart_counts = Cart.objects.filter(userid=request.user.id).count()
         wishlist_counts = Wishlist.objects.filter(user=request.user.id).count()
-
         products = []
         for i in all_products:
             products.append({
@@ -41,12 +40,10 @@ def home(request):
                 "proOffer"  : i.proOffer,
                 "offeredprice" :i.price -  i.price * (i.proOffer/100)
             })
-
         paginator = Paginator(products,4)
         page_number = request.GET.get('page')
         productdata = paginator.get_page(page_number)
         totalpage = productdata.paginator.num_pages
-
         context = {'all_products':all_products,'banner':banner,'categories':categories,'cart_counts':cart_counts,'wishlist_counts':wishlist_counts,'product_data':productdata,'last_page':totalpage,'list':[n+1 for n in range(totalpage)]}
         return render(request, 'index.html',context)
     
@@ -92,20 +89,22 @@ def Logout(request):
 
 @never_cache 
 def login_view(request): 
-    print("HEREEEEEESSSSSSS")
     if request.user.is_authenticated:
         return redirect(home)
     if request.method == "POST":
-        print("nillll")
         email = request.POST['email']
         password = request.POST['password']
-        print(email,password,"araaaaaaaaaaaaa")
         user = authenticate(email=email,password=password)
-        print(user,"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
         if user is not None:
-            messages.success(request,"Successfully login")
-            login(request, user)
-            return redirect(home)
+            print(user.active,"THE VAL")
+            print(user.get_active,"THE VALUESSSSSSSSSS")
+            if user.active:
+                messages.success(request,"Successfully login")
+                login(request, user)
+                return redirect(home)
+            else:
+                messages.error(request, "The user is Blocked..!")
+                return redirect(login_view)
         else:
             n = "invalid credentials"
             messages.error(request,n)
@@ -228,7 +227,8 @@ def phoneotp(request):
             User.objects.filter(phoneno=phoneno).update(active=True)
             user = User.objects.create_user(fullname=fullname,email=email,phoneno=phoneno,password=password1)
             user.save()
-            messages.info(request,'User Created Successfully')
+            login(request, user)
+            messages.success(request,'User Created Successfully')
             return redirect(home)
     return render(request, 'otp/otp.html')
 

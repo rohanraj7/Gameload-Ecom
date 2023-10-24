@@ -168,37 +168,43 @@ def product_addtocart(request,id,source):
                 messages.info(request,"The products is already Exists")
                 return redirect(home)
             else:
-                print(stock_item.quantity,"THE PERSONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
-                cart_item = Cart(
-                    userid = request.user,
-                    productid = stock_item,
-                    productname = stock_item.name, 
-                    price = stock_item.price,
-                    image = stock_item.image1,
-                    quantity = 1,
-                    amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
-                )
-                cart_item.save()
-                print(stock_item.quantity,"The quanityyyyyyyyyyyyyyyyyy")
-                messages.success(request, "Added to Cart")
-                return redirect(home)
+                if stock_item.stock != 0:
+                    cart_item = Cart(
+                        userid = request.user,
+                        productid = stock_item,
+                        productname = stock_item.name, 
+                        price = stock_item.price,
+                        image = stock_item.image1,
+                        quantity = 1,
+                        amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
+                    )
+                    cart_item.save()
+                    messages.success(request, "Added to Cart")
+                    return redirect(home)
+                else:
+                    messages.error(request,"Product Out of Stock")
+                    return redirect(home)
         if source == 'products':
             if Cart.objects.filter(productid = stock_item, userid = request.user).exists():
                 messages.info(request,"The products is already Exists")
                 return redirect(products)
             else:
-                cart_item = Cart(
-                    userid = request.user,
-                    productid = stock_item,
-                    productname = stock_item.name, 
-                    price = stock_item.price,
-                    image = stock_item.image1,
-                    quantity = 1,
-                    amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
-                )
-                cart_item.save()
-                messages.success(request, "Added to Cart")
-                return redirect(products)
+                if stock_item.stock != 0:
+                    cart_item = Cart(
+                        userid = request.user,
+                        productid = stock_item,
+                        productname = stock_item.name, 
+                        price = stock_item.price,
+                        image = stock_item.image1,
+                        quantity = 1,
+                        amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
+                    )
+                    cart_item.save()
+                    messages.success(request, "Added to Cart")
+                    return redirect(products)
+                else:
+                    messages.error(request,"Product Out of Stock")
+                    return redirect(products)
         if source == 'single_products':
             if Cart.objects.filter(productid = stock_item, userid = request.user).exists():
                 messages.info(request,"The products is already Exists")
@@ -207,19 +213,25 @@ def product_addtocart(request,id,source):
                 if request.method == "POST":
                     offered_price = request.POST['offered_price']
                     quantity = request.POST['quantity']
-                    cart_item = Cart(
-                    userid = request.user,
-                    productid = stock_item,
-                    productname = stock_item.name, 
-                    price = stock_item.price,
-                    image = stock_item.image1,
-                    quantity = quantity,
-                    amount = offered_price
-                )
-                cart_item.save()
-                messages.success(request, "Added to Cart")
-                return redirect(cart_view)
-            
+                    if int(quantity) <= stock_item.stock: 
+                        print(quantity,"Single products2")
+                        cart_item = Cart(
+                        userid = request.user,
+                        productid = stock_item,
+                        productname = stock_item.name, 
+                        price = stock_item.price,
+                        image = stock_item.image1,
+                        quantity = quantity,
+                        amount = offered_price
+                        )
+                        cart_item.save()
+                        print("Single products3")
+                        messages.success(request, "Added to Cart")
+                        return redirect(cart_view)
+                    else:
+                        print("Single products4")
+                        messages.info(request, f"Only {stock_item.stock} product is Left")
+                        return redirect('single_product', id=id)
 # ________________GUEST_USER________________________
     else:
         stock_item = Stock.objects.get(id=id)
@@ -233,37 +245,43 @@ def product_addtocart(request,id,source):
                 messages.info(request,"The products is already Exists")
                 return redirect(home)
             else:
-                print(stock_item.quantity,"THE PERSONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
-                cart_item = Guestcart(
-                    userreference = key,
-                    productid = stock_item,
-                    productname = stock_item.name, 
-                    price = stock_item.price,
-                    image = stock_item.image1,
-                    quantity = 1,
-                    amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
-                )
-                cart_item.save()
-                print(stock_item.quantity,"The quanityyyyyyyyyyyyyyyyyy")
-                messages.success(request, "Added to Cart")
-                return redirect(home)
+                if stock_item.stock != 0:
+                    cart_item = Guestcart(
+                        userreference = key,
+                        productid = stock_item,
+                        productname = stock_item.name, 
+                        price = stock_item.price,
+                        image = stock_item.image1,
+                        quantity = 1,
+                        amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
+                    )
+                    cart_item.save()
+                    messages.success(request, "Added to Cart")
+                    return redirect(home)
+                else:
+                    messages.error(request, "Product is Out of stock!")
+                    return redirect(home)
         if source == 'products':
             if Guestcart.objects.filter(productid = stock_item, userreference = key).exists():
                 messages.info(request,"The products is already Exists")
                 return redirect(products)
             else:
-                cart_item = Guestcart(
-                    userreference = key,
-                    productid = stock_item,
-                    productname = stock_item.name, 
-                    price = stock_item.price,
-                    image = stock_item.image1,
-                    quantity = 1,
-                    amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
-                )
-                cart_item.save()
-                messages.success(request, "Added to Cart")
-                return redirect(products)
+                if stock_item.stock != 0:
+                    cart_item = Guestcart(
+                        userreference = key,
+                        productid = stock_item,
+                        productname = stock_item.name, 
+                        price = stock_item.price,
+                        image = stock_item.image1,
+                        quantity = 1,
+                        amount = stock_item.price - (stock_item.price * stock_item.proOffer)/100
+                    )
+                    cart_item.save()
+                    messages.success(request, "Added to Cart")
+                    return redirect(products)
+                else:
+                    messages.error(request, "Product is Out of stock!")
+                    return redirect(products)
         if source == 'single_products':
             if Guestcart.objects.filter(productid = stock_item, userreference = key).exists():
                 messages.info(request,"The products is already Exists")
@@ -272,19 +290,22 @@ def product_addtocart(request,id,source):
                 if request.method == "POST":
                     offered_price = request.POST['offered_price']
                     quantity = request.POST['quantity']
-                    cart_item = Guestcart(
-                    userreference = key,
-                    productid = stock_item,
-                    productname = stock_item.name, 
-                    price = stock_item.price,
-                    image = stock_item.image1,
-                    quantity = quantity,
-                    amount = offered_price
-                )
-                cart_item.save()
-                messages.success(request, "Added to Cart")
-                return redirect(cart_view)
-
+                    if int(quantity) <= stock_item.stock:
+                        cart_item = Guestcart(
+                        userreference = key,
+                        productid = stock_item,
+                        productname = stock_item.name, 
+                        price = stock_item.price,
+                        image = stock_item.image1,
+                        quantity = quantity,
+                        amount = offered_price
+                        )
+                        cart_item.save()
+                        messages.success(request, "Added to Cart")
+                        return redirect(cart_view)
+                    else:
+                        messages.info(request, f"Only {stock_item.stock} product is Left")
+                        return redirect('single_product', id=id)   
     return render(request, 'login_signup/login.html')
 
 

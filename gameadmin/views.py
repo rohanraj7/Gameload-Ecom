@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth import authenticate,login
 import datetime
+from ordermanagement.views import coupon_generator
 from django.contrib.auth import logout
 from ordermanagement.models import Myorders
 from django.core.paginator import Paginator
@@ -102,8 +103,7 @@ def banner(request):
         banner = Banner(image=img)
         banner.save()   
     banner = Banner.objects.all()
-    context={'banner':banner}
-    return render(request, 'admin/banner.html',context)
+    return render(request, 'admin/banner.html',{'banner':banner})
 
 def delete_banner(request,id):
     banner = Banner.objects.get(id=id)
@@ -162,30 +162,7 @@ def orders(request):
 
 
 
-def coupon_generator(request):
-    if request.user.is_superuser:
-        if request.method == "POST":
-            coupon_name = request.POST['coupon_name']
-            coupon_code = request.POST['coupon_code']
-            date_form = request.POST['date_form']
-            date_form_datetime = timezone.make_aware(datetime.strptime(date_form, "%Y-%m-%d"))  # Convert to aware datetime
-            minimum_price = request.POST['minimum_price']
-            minimum_price = request.POST['minimum_price']
-            discount = request.POST['discount']
-            current_date = timezone.now() 
 
-             # Check if the coupon is active or expired
-            status = "Active" if date_form_datetime >= current_date else "Expired"  # Compare date_form_datetime with current_date
-
-
-            coupon_data = Coupon(coupon_name=coupon_name,coupon_code=coupon_code,validtill=date_form_datetime,minimum_price=minimum_price,discount=discount,status=status)
-            coupon_data.save()
-            messages.success(request, 'The Coupon Added Successfully')
-            return redirect(coupon_generator)
-        coupons = Coupon.objects.all()
-        context = {'coupons':coupons}
-        return render(request, 'admin/coupon.html',context)
-    return render(request, 'admin/adminlogin.html')
     
 
 def delete_coupon(request,id):

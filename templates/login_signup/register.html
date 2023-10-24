@@ -44,25 +44,25 @@
               {% csrf_token %}
               <div class="form-group first">
                 <label for="fullname">Full name</label>
-                <input type="text" class="form-control" name="name">
+                <input type="text" class="form-control" required name="name">
 
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" name="email">
+                <input type="email" class="form-control" required name="email">
               </div>
               <div class="form-group">
                 <label for="number">Phone Number</label>
-                <input type="number" class="form-control" name="number">
+                <input type="number" class="form-control" required name="number">
               </div>
               <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" name="password">
+                <input type="password" class="form-control" required name="password">
                 
               </div>
               <div class="form-group last mb-4">
                 <label for="re-password">Re-type Password</label>
-                <input type="password" class="form-control" name="re-password">
+                <input type="password" class="form-control" required name="re-password">
                 
               </div>
               

@@ -11,6 +11,8 @@ urlpatterns = [
     path('myorders/',views.myorders,name="myorders"),
     path('cancelorder/<int:id>',views.cancelorder,name="cancelorder"),
     path('return/<int:id>',views.return_order,name="return_order"),
+    path('coupons/',views.coupon_generator,name="coupon_generator"),
+    path('removecoupon/<int:id>',views.delete_coupon,name="delete_coupon"),
 ]
 
 
