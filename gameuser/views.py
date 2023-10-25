@@ -96,8 +96,6 @@ def login_view(request):
         password = request.POST['password']
         user = authenticate(email=email,password=password)
         if user is not None:
-            print(user.active,"THE VAL")
-            print(user.get_active,"THE VALUESSSSSSSSSS")
             if user.active:
                 messages.success(request,"Successfully login")
                 login(request, user)
@@ -130,7 +128,6 @@ def signup(request):
         if '+91' not in phoneno:
             phoneno = '+91' + phoneno
         otp = 1234
-        print(phoneno,"The Number Camed Everything Working")
         message_handler = MessageHandler(phoneno,otp).send_otp_to_phone()
         context={
             "name": fullname,
@@ -157,9 +154,7 @@ def profile(request):
     return render(request, 'login_signup/register.html')
 
 def change_password(request):
-    print("OUT")
     if request.user.is_authenticated:
-        print("INSIDE")
         if request.method == "POST":
             current = request.POST['password']
             newpassword = request.POST['newpassword']
@@ -170,7 +165,6 @@ def change_password(request):
                     user_data = User.objects.get(id=request.user.id)
                     user_data.set_password(newpassword)
                     user_data.save()
-                    print("GOODDDD")
                     # Log the user back in with updated credentials
                     updated_user = authenticate(request, email=user_data.email, password=newpassword)
                     if updated_user is not None:

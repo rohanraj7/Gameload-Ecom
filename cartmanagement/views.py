@@ -45,120 +45,6 @@ def cart_view(request):
         context={'total':total,'cart_counts':counts,'carts':carts,'wishlist_counts':wishlist_counts,"subtotal":subtotal,"total_price":total_price}
         return render(request, 'cart.html',context)
 
-# @never_cache
-# def cart_to_checkout(request):
-#     if request.user.is_authenticated:
-#         # address_data = Address.objects.filter(user=request.user)
-#         # print(address_data.values(),"THE DETAILSSSSSSSSSSSSSSSSSsssss")
-#         try:
-#             cart_items = Cart.objects.filter(userid=request.user)
-#             product = Cart.objects.filter(userid=request.user.id).values()
-#             print(product,"THE PRODUCT VALUES ARE THIS...!")
-#             subtotal = sum(amount.price*amount.quantity for amount in cart_items)
-#             total_price = sum(item.amount for item in cart_items)
-#             total = total_price
-#             cart_counts = Cart.objects.filter(userid=request.user.id).count()
-#             wishlist_counts = Wishlist.objects.filter(user=request.user.id).count()
-#             address_data = Address.objects.filter(user=request.user)
-#             coupons = Coupon.objects.filter(status="Active")
-#             discount = 0
-#             previous_amount = 0
-#             applied = None  # Initializing applied as None
-#         except:
-#             cart_items = None
-#         # if not cart_items and cart_items is None:
-#         #     return render(request, 'cart.html')
-#         # total_money_decimal = total_amount * 100
-#         # request.session['total_amount'] = total_amount
-#         # request.session['total_money_decimal'] = total_money_decimal
-
-#         # if request.method == "POST":
-#         #     subtotal = request.POST.get('subtotal')
-#         #     total = request.POST.get('total')
-#         #     total_price = request.POST.get('total_price')
-#         #     cart_counts = Cart.objects.filter(userid=request.user.id).count()
-#         #     wishlist_counts = Wishlist.objects.filter(user=request.user.id).count()
-#         #     address_data = Address.objects.filter(user=request.user)
-#         #     print(subtotal,total_price,total,"PRICES ARE ARRANGED HEREEE AACCORDIONGLYYYYYYY")
-#         #     # print(address_data.values(),"THE DETAILSSSSSSSSSSSSSSSSSsssss")
-#         #     # cart_items = Cart.objects.filter(userid=request.user)
-#         #     # total_amount = sum(item.amount for item in cart_items)
-#         #     # total_money_decimal = total_amount * 100
-#         #     # request.session['total_amount'] = total_amount
-#         #     # request.session['total_money_decimal'] = total_money_decimal
-#         #     coupons = Coupon.objects.filter(status="Active")
-#         #     context = {
-#         #     "subtotal": subtotal,
-#         #     "total":total,
-#         #     "total_price":total_price,
-#         #     "cart_counts": cart_counts,
-#         #     "wishlist_counts":wishlist_counts,
-#         #     "address_data": address_data,
-#         #     "coupons":coupons
-#         #     }
-#         #     messages.success(request, 'Proccesed To Checkout !')
-#         #     return render(request, 'checkout.html',context)
-
-#         if request.method == "POST":
-#             address_details = request.POST['address']
-#             payment_method = request.POST['method']
-#             address_data_id= Address.objects.get(id=address_details)
-#             print("The address id is :-",address_data_id)
-#             print("The payment method is",payment_method)
-
-#             if payment_method == "COD":
-#                 for ob in product:
-#                     product_data = Stock.objects.get(id=ob['productid_id'])
-#                     if product_data.stock >= ob['quantity']:
-#                         pass
-
-                    
-
-#         # COUPONS_MANAGEMENT 
-#         now = timezone.now()
-#         if 'coupon_filled' in request.GET:
-#             code = request.GET['coupon']
-#             try:
-#                 coupon_details = Coupon.objects.get(
-#                     coupon_code=code,
-#                     added_date__lt=now,
-#                     validtill__gte=now,  # Ensure the coupon is not expired.
-#                     minimum_price__lte=total_price  # Ensure the total price meets the minimum requirement.
-#                 )
-                
-#                 request.session['coupon_offer'] = coupon_details.discount
-#                 request.session['coupon_code'] =coupon_details.coupon_code
-#                 applied = request.session['coupon_code']
-#                 if request.session['coupon_offer'] is not None:
-#                     previous_amount = total
-#                     discount = (total*request.session['coupon_offer'])/100
-#                     total = total-(total*request.session['coupon_offer'])/100
-#                     total_price = total
-#                     n = ' Coupon APPLIED successfully '
-#                     messages.success(request,n)
-#             except Coupon.DoesNotExist:
-#                 print("NOT AT ALL")
-#                 messages.error(request, "Coupon Not Valid, Enter Valid Coupon..!")
-#                 return redirect(cart_to_checkout)
-            
-#         context = {
-#             "product":product,
-#             "subtotal": subtotal,
-#             "total":total,
-#             "total_price":total_price,
-#             "cart_counts": cart_counts,
-#             "wishlist_counts":wishlist_counts,
-#             "address_data": address_data,
-#             "coupons":coupons,
-#             "discount":discount,
-#             "previous_amount":previous_amount,
-#             "applied":applied
-#         }
-#         return render(request, 'checkout.html',context)
-#     else:
-#         messages.success(request, 'Please Signin then only Place Order..!')   
-#         return render(request, 'login_signup/login.html')
-
 
 def product_addtocart(request,id,source):
     if request.user.is_authenticated:
@@ -214,7 +100,6 @@ def product_addtocart(request,id,source):
                     offered_price = request.POST['offered_price']
                     quantity = request.POST['quantity']
                     if int(quantity) <= stock_item.stock: 
-                        print(quantity,"Single products2")
                         cart_item = Cart(
                         userid = request.user,
                         productid = stock_item,
@@ -225,11 +110,9 @@ def product_addtocart(request,id,source):
                         amount = offered_price
                         )
                         cart_item.save()
-                        print("Single products3")
                         messages.success(request, "Added to Cart")
                         return redirect(cart_view)
                     else:
-                        print("Single products4")
                         messages.info(request, f"Only {stock_item.stock} product is Left")
                         return redirect('single_product', id=id)
 # ________________GUEST_USER________________________
@@ -239,7 +122,6 @@ def product_addtocart(request,id,source):
             request.session.create()
         request.session['guest_key']=request.session.session_key
         key = request.session['guest_key']
-        print(key,"THE REQUEST USER OF SESSION IS THISSSSSSSSSSSSSSSSSSSSSSSSSS")
         if source == 'index':
             if Guestcart.objects.filter(productid = stock_item, userreference = key).exists():
                 messages.info(request,"The products is already Exists")

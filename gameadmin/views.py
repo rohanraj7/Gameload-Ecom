@@ -178,9 +178,7 @@ def delete_coupon(request,id):
     
 
 def orderstatus(request,id):
-    print("No")
     if request.user.is_superuser:
-        print("YES")
         ob = Myorders.objects.values('status','orderstatus').get(id=id)
         if ob['status'] == True:
             if ob['orderstatus'] == "Placed":
