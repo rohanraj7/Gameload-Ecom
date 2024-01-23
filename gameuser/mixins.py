@@ -4,7 +4,7 @@ from django.conf import settings
 from django.shortcuts import redirect,render
 from twilio.rest import Client 
 from twilio.base.exceptions import TwilioException
-from django.http import HttpResponse, HttpResponseServerError
+# from django.http import HttpResponse, HttpResponseServerError
 
 
 class MessageHandler:
