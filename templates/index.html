@@ -54,7 +54,7 @@
 					</div>
 					{% if request.user.is_authenticated %}
 					<div class="reg">
-						<p class="mb-0"><a href="{% url 'profile' %}" class="mr-2">PROFILE</a><a href="{% url 'myorders' %}" class="mr-2" >MYORDERS </a><a href="{% url 'logout' %}">Log out </a></p>
+						<p class="mb-0"><a href="{% url 'profile' %}" class="mr-2">PROFILE</a><a href="{% url 'myorders' %}" class="mr-2" >MYORDERS </a></a><a href="" class="mr-2">{{user}} </a><a href="{% url 'logout' %}" >Log out </a></p>
 					</div>
 					{% else %}
 					<div class="reg">

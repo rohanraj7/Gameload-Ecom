@@ -8,7 +8,7 @@ from gameadmin.models import Coupon
 from django.utils import timezone
 from productmanagement.models import Stock
 from ordermanagement.models import Myorders
-from datetime import datetime
+from datetime import datetime , timedelta
 from gameuser.views import home
 from datetime import datetime
 import razorpay
@@ -389,11 +389,56 @@ def success_page(request):
         return render(request, 'success.html')
     return render(request, 'login_signup/login.html')
 
+
+# first one is original i was make some changes checking with date within the 10days like
+
 def return_order(request,id):
     if request.user.is_authenticated:
-        order_list = Myorders.objects.get(id=id)
+        order_list = Myorders.objects.filter(id=id)
+        print(order_list.values(),"the peoples")
         order_list.orderstatus = "Return Pending"
         order_list.save()
         messages.error(request, "The Product Returned")
         return redirect(myorders)
     return render(request, 'login_signup/login.html')
+
+# def return_order(request, id):
+#     if request.user.is_authenticated:
+#         order = Myorders.objects.filter(id=id).first()
+#         if order:
+#             order_date = order.orderdate
+#             current_date = datetime.now(order_date.tzinfo)
+
+#             if current_date <= order_date + timedelta(days=10):
+#                 # If the current date is within 10 days of the order date
+#                 order.orderstatus = "Return Pending"
+#                 order.save()
+#                 messages.success(request, "The Product is Marked for Return")
+#             else:
+#                 messages.error(request, "Return not possible after 10 days of purchase")
+
+#             return redirect(myorders)
+#         else:
+#             messages.error(request, "Order not found")
+#             return redirect(myorders)
+#     return render(request, 'login_signup/login.html')
+
+# def return_order(request, id):
+#     if request.user.is_authenticated:
+#         orders = Myorders.objects.filter(id=id)
+#         if orders.exists():
+#             for order in orders:
+#                 order_date = order.orderdate
+#                 current_date = datetime.now(order_date.tzinfo)
+
+#                 if current_date <= order_date + timedelta(days=10):
+#                     # If the current date is within 10 days of the order date
+#                     order.orderstatus = "Return Pending"
+#                     order.save()
+#                     messages.success(request, "The Product is Marked for Return")
+#                 else:
+#                     messages.error(request, f"Return not possible for order {order.orderid} after 10 days of purchase")
+#         else:
+#             messages.error(request, "Order not found")
+#         return redirect(myorders)
+#     return render(request, 'login_signup/login.html')

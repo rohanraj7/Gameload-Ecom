@@ -1,3 +1,4 @@
+from urllib import response
 from django.shortcuts import render,redirect
 from productmanagement.models import Stock
 from django.contrib.auth import authenticate, login, logout
@@ -128,15 +129,23 @@ def signup(request):
         if '+91' not in phoneno:
             phoneno = '+91' + phoneno
         otp = 1234
-        message_handler = MessageHandler(phoneno,otp).send_otp_to_phone()
-        context={
-            "name": fullname,
-            "email": email,
-            "phoneno": phoneno,
-            "password1": password1,
-            "password2": password2
-        }
-        return render(request, 'otp/otp.html',context)
+        message_handler = MessageHandler(phoneno,otp)
+        response = message_handler.send_otp_to_phone(request)
+        if "Succesfully send OTP" in response:
+            context = {
+                "name": fullname,
+                "email": email,
+                "phoneno": phoneno,
+                "password1": password1,
+                "password2": password2
+            }
+            messages.success(request, 'Otp successfully Sented..!')
+            return render(request, 'otp/otp.html', context)
+        elif "Failed to send OTP" in response:
+                messages.error(request, 'This PhoneNo is Not verified In Twilio. Use This Username: rohanraj.py@gmail.com and Password: 123 for Login..')
+                return redirect(signup)
+        else:
+            print("Noneee..!------------------------------------------------")
     return render(request, 'login_signup/register.html')
 
 
@@ -218,12 +227,21 @@ def phoneotp(request):
         code = request.POST.get('code')
         verify = MessageHandler(phoneno,code).validate()
         if verify:
-            User.objects.filter(phoneno=phoneno).update(active=True)
-            user = User.objects.create_user(fullname=fullname,email=email,phoneno=phoneno,password=password1)
-            user.save()
-            login(request, user)
-            messages.success(request,'User Created Successfully')
-            return redirect(home)
+            print(phoneno,"WONDERFULL CAMED HERE MAN......!")
+            user=User.objects.filter(phoneno=phoneno)
+            print(user,"ARA NIKKALLUUEKKB MACHUUUU")
+            # user = User.objects.get(phoneno=phoneno)
+            # print(ob.user, "ARARA NIKKALUE TELL MEE........!")
+            # print(user,"------------------->>>>")
+            if not user.exists():
+                user = User.objects.create_user(fullname=fullname,email=email,phoneno=phoneno,password=password1)
+                user.save()
+                login(request, user)
+                messages.success(request,'User Created Successfully')
+                return redirect(home)
+            else:
+                messages.error(request,"The Phone Number Already Exists...!")
+                return redirect(signup)
     return render(request, 'otp/otp.html')
 
 
