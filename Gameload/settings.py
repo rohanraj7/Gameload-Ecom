@@ -25,7 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = config('DEBUG', default=False, cast=bool)  # Default is False if not specified
+
 
 ALLOWED_HOSTS = ["*"]
 
@@ -83,10 +85,10 @@ WSGI_APPLICATION = "Gameload.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config('NAME'),
-        "USER": config('USER'),
-        'PASSWORD': config('PASSWORD'),
-        'HOST': config('HOST'),
+        "NAME": 'newdatas',
+        "USER": 'postgres',
+        'PASSWORD': '123',
+        'HOST': 'localhost',
     }
 }
 
@@ -149,10 +151,10 @@ AUTH_TOKEN =  config('AUTH_TOKEN')
 SERVICE_ID =  config('SERVICE_ID')
 
 
-
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT')
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+

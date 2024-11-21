@@ -126,26 +126,55 @@ def signup(request):
         if User.objects.filter(email=email).exists():
             messages.info(request, 'Email is Already Taken')
             return redirect(signup)
-        if '+91' not in phoneno:
-            phoneno = '+91' + phoneno
-        otp = 1234
-        message_handler = MessageHandler(phoneno,otp)
-        response = message_handler.send_otp_to_phone(request)
-        if "Succesfully send OTP" in response:
-            context = {
-                "name": fullname,
-                "email": email,
-                "phoneno": phoneno,
-                "password1": password1,
-                "password2": password2
-            }
-            messages.success(request, 'Otp successfully Sented..!')
-            return render(request, 'otp/otp.html', context)
-        elif "Failed to send OTP" in response:
-                messages.error(request, 'This PhoneNo is Not verified In Twilio. Use This Username: rohanraj.py@gmail.com and Password: 123 for Login..')
-                return redirect(signup)
-        else:
-            print("Noneee..!------------------------------------------------")
+        
+        otp = str(random.randint(100000, 999999))
+        print("1st stage")
+        request.session['signup_data'] = {
+            'name': fullname,
+            'email': email,
+            'phoneno': phoneno,
+            'password': password1,
+            'otp': otp,
+        }
+        print("2nd stage")
+        # Send OTP via email
+        subject = 'Signup OTP Verification'
+        message = f'Your OTP for signup is: {otp}'
+        from_email = 'rohanraj9645@gmail.com'
+        recipient_list = [email]
+        
+        print("Completedd")
+
+        try:
+            print("Here")
+            send_mail(subject, message, from_email, recipient_list)
+            messages.success(request, 'OTP sent to your email.')
+            return redirect('phoneotp')  # Redirect to OTP verification page
+        except Exception as e:
+            print("Declined Here!!!")
+            messages.error(request, f'Error sending OTP: {e}')
+            return redirect(signup)
+
+        # if '+91' not in phoneno:
+        #     phoneno = '+91' + phoneno
+        # otp = 1234
+        # message_handler = MessageHandler(phoneno,otp)
+        # response = message_handler.send_otp_to_phone(request)
+        # if "Succesfully send OTP" in response:
+        #     context = {
+        #         "name": fullname,
+        #         "email": email,
+        #         "phoneno": phoneno,
+        #         "password1": password1,
+        #         "password2": password2
+        #     }
+        #     messages.success(request, 'Otp successfully Sented..!')
+        #     return render(request, 'otp/otp.html', context)
+        # elif "Failed to send OTP" in response:
+        #         messages.error(request, 'This PhoneNo is Not verified In Twilio. Use This Username: rohanraj.py@gmail.com and Password: 123 for Login..')
+        #         return redirect(signup)
+        # else:
+        #     print("Noneee..!------------------------------------------------")
     return render(request, 'login_signup/register.html')
 
 
@@ -217,76 +246,161 @@ def forgot_password(request):
             messages.error(request, 'Email Not Found Please Enter a Valid email address.!')
     return render(request, 'login_signup/forgot.html')
 
+# This Function is temperally hashed because of the limitation of the twilio for the newly joined Members
+
 # for the registeration otp 
+# def phoneotp(request):
+#     if request.method == "POST":
+#         fullname = request.POST.get('name')
+#         email = request.POST.get('email')
+#         password1 = request.POST.get('password')
+#         phoneno = request.POST.get('phoneno')
+#         code = request.POST.get('code')
+#         verify = MessageHandler(phoneno,code).validate()
+#         if verify:
+#             print(phoneno,"WONDERFULL CAMED HERE MAN......!")
+#             user=User.objects.filter(phoneno=phoneno)
+#             print(user,"ARA NIKKALLUUEKKB MACHUUUU")
+#             # user = User.objects.get(phoneno=phoneno)
+#             # print(ob.user, "ARARA NIKKALUE TELL MEE........!")
+#             # print(user,"------------------->>>>")
+#             if not user.exists():
+#                 user = User.objects.create_user(fullname=fullname,email=email,phoneno=phoneno,password=password1)
+#                 user.save()
+#                 login(request, user)
+#                 messages.success(request,'User Created Successfully')
+#                 return redirect(home)
+#             else:
+#                 messages.error(request,"The Phone Number Already Exists...!")
+#                 return redirect(signup)
+#     return render(request, 'otp/otp.html')
+
 def phoneotp(request):
-    if request.method == "POST":
-        fullname = request.POST.get('name')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password')
-        phoneno = request.POST.get('phoneno')
-        code = request.POST.get('code')
-        verify = MessageHandler(phoneno,code).validate()
-        if verify:
-            print(phoneno,"WONDERFULL CAMED HERE MAN......!")
-            user=User.objects.filter(phoneno=phoneno)
-            print(user,"ARA NIKKALLUUEKKB MACHUUUU")
-            # user = User.objects.get(phoneno=phoneno)
-            # print(ob.user, "ARARA NIKKALUE TELL MEE........!")
-            # print(user,"------------------->>>>")
-            if not user.exists():
-                user = User.objects.create_user(fullname=fullname,email=email,phoneno=phoneno,password=password1)
-                user.save()
-                login(request, user)
-                messages.success(request,'User Created Successfully')
-                return redirect(home)
-            else:
-                messages.error(request,"The Phone Number Already Exists...!")
-                return redirect(signup)
+    if request.method == 'POST':
+        entered_otp = request.POST['code']
+        signup_data = request.session.get('signup_data')
+        print(signup_data, "value is Here!!!!!!!")
+        print(entered_otp,"enteredotp")
+        print(signup_data['otp'],"the otp from the session")
+        if not signup_data:
+            messages.error(request, 'Session expired. Please sign up again.')
+            return redirect('signup')
+
+        if entered_otp == signup_data['otp']:
+            user = User.objects.create_user(fullname=signup_data['name'],email=signup_data['email'],phoneno=signup_data['phoneno'],password=signup_data['password'])
+            user.save()
+            messages.success(request, 'Signup successful! Please log in.')
+            del request.session['signup_data']  # Clear session data
+            return redirect('login_view')
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+
     return render(request, 'otp/otp.html')
 
-
-def loginwithphone(request):
+def loginwithemail(request):
     if request.method == "POST":
-        number = request.POST['number']
-        if '+91' in number:
-            pass
-        else:
-            number = '+91' + number
-        otp = 1234
-        message_handler = MessageHandler(number,otp).send_otp_to_phone()
-        return render(request, 'otp/phoneotp.html',{'phoneno':number})
+        email = request.POST['email']
+        otp = random.randint(100000, 999999)  # Generate a 6-digit OTP
+
+        # Save the OTP in the session
+        request.session['email_otp'] = otp
+        # request.session['email'] = email
+
+        subject = 'Login OTP Verification'
+        message = f"Your OTP for login is: {otp}"
+        from_email = 'rohanraj9645@gmail.com'  # Replace with your actual email
+        recipient_list = [email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list)
+            messages.success(request, 'OTP sent to your email.')
+            return render(request, 'otp/phoneotp.html', {'email': email})  # Redirect to OTP form page
+        except Exception as e:
+            messages.error(request, f"Error sending OTP: {e}")
+            return redirect('loginwithemail')
+
     return render(request, 'otp/phonelogin.html')
+
+# This Function is temperally hashed because of the limitation of the twilio for the newly joined Members
+
+# def loginwithphone(request):
+#     if request.method == "POST":
+#         number = request.POST['number']
+#         if '+91' in number:
+#             pass
+#         else:
+#             number = '+91' + number
+#         otp = 1234
+#         message_handler = MessageHandler(number,otp).send_otp_to_phone()
+#         return render(request, 'otp/phoneotp.html',{'phoneno':number})
+#     return render(request, 'otp/phonelogin.html')
 
 
 def otplogin(request):
     if request.method == "POST":
-        phone = request.POST['phoneno']
-        if '+91' in phone:
-            pass
-        else:
-            phone = "+91" + phone
-        otp = int(request.POST['otp'])
+        email = request.POST['email']
+        otp = request.POST['otp']
+
+        # Retrieve the stored OTP from session
+        session_otp = request.session.get('email_otp')
+        
+        # Ensure that both the email and OTP are provided
+        if not email or not otp:
+            messages.error(request, "Email and OTP are required.")
+            return render(request, 'otp/emailotp.html', {'email': email})
+
         try:
-            user = User.objects.get(phoneno=phone)
+            user = User.objects.get(email=email)
 
-            validate = MessageHandler(phone, otp).validate()
-
-            if validate == "approved":
-                if user is not None:
-                    login(request, user)
-                    messages.success(request, f"{user} Logged In")
-                    return redirect('index') 
+            # Validate the OTP
+            if str(session_otp) == str(otp):
+                # Clear the OTP and email from session after successful login
+                del request.session['email_otp']
+                # del request.session['email']
+                
+                # Log in the user
+                login(request, user)
+                messages.success(request, f"{user.email} successfully logged in.")
+                return redirect('index')  # Redirect to your home page after login
             else:
-                messages.info(request, 'Incorrect OTP. Please try again.')
-                return render(request, 'otp/phoneotp.html', {'phoneno': phone})
+                messages.error(request, 'Incorrect OTP. Please try again.')
+                return render(request, 'otp/phoneotp.html', {'email': email})
 
         except ObjectDoesNotExist:
-            messages.error(request, 'User not found , Please sign up.')
-            return redirect('signup') 
-        
+            messages.error(request, 'User not found. Please sign up.')
+            return redirect('signup')
+
     return render(request, 'otp/phoneotp.html')
 
+# This Function is temperally hashed because of the limitation of the twilio for the newly joined Members
 
+# def otplogin(request):
+#     if request.method == "POST":
+#         phone = request.POST['phoneno']
+#         if '+91' in phone:
+#             pass
+#         else:
+#             phone = "+91" + phone
+#         otp = int(request.POST['otp'])
+#         try:
+#             user = User.objects.get(phoneno=phone)
+
+#             validate = MessageHandler(phone, otp).validate()
+
+#             if validate == "approved":
+#                 if user is not None:
+#                     login(request, user)
+#                     messages.success(request, f"{user} Logged In")
+#                     return redirect('index') 
+#             else:
+#                 messages.info(request, 'Incorrect OTP. Please try again.')
+#                 return render(request, 'otp/phoneotp.html', {'phoneno': phone})
+
+#         except ObjectDoesNotExist:
+#             messages.error(request, 'User not found , Please sign up.')
+#             return redirect('signup') 
+        
+#     return render(request, 'otp/phoneotp.html')
 # This Method is For Filter the values through the categories 
  
 def filter(request,id):
